@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		A08FC06C1DA1070200C53DAB /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = A08FC06B1DA1070200C53DAB /* main.c */; };
+		A08FC0771DA151C700C53DAB /* CommandBatch.c in Sources */ = {isa = PBXBuildFile; fileRef = A08FC0751DA151C700C53DAB /* CommandBatch.c */; };
+		A0BB5F8D1DA184F400BB3BC7 /* Utils.c in Sources */ = {isa = PBXBuildFile; fileRef = A0BB5F8B1DA184F400BB3BC7 /* Utils.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +27,10 @@
 /* Begin PBXFileReference section */
 		A08FC0681DA1070200C53DAB /* MyShell */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MyShell; sourceTree = BUILT_PRODUCTS_DIR; };
 		A08FC06B1DA1070200C53DAB /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		A08FC0751DA151C700C53DAB /* CommandBatch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CommandBatch.c; sourceTree = "<group>"; };
+		A08FC0761DA151C700C53DAB /* CommandBatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandBatch.h; sourceTree = "<group>"; };
+		A0BB5F8B1DA184F400BB3BC7 /* Utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Utils.c; sourceTree = "<group>"; };
+		A0BB5F8C1DA184F400BB3BC7 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +64,10 @@
 			isa = PBXGroup;
 			children = (
 				A08FC06B1DA1070200C53DAB /* main.c */,
+				A08FC0751DA151C700C53DAB /* CommandBatch.c */,
+				A08FC0761DA151C700C53DAB /* CommandBatch.h */,
+				A0BB5F8B1DA184F400BB3BC7 /* Utils.c */,
+				A0BB5F8C1DA184F400BB3BC7 /* Utils.h */,
 			);
 			path = MyShell;
 			sourceTree = "<group>";
@@ -120,7 +130,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A0BB5F8D1DA184F400BB3BC7 /* Utils.c in Sources */,
 				A08FC06C1DA1070200C53DAB /* main.c in Sources */,
+				A08FC0771DA151C700C53DAB /* CommandBatch.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,6 +261,7 @@
 				A08FC0711DA1070200C53DAB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
