@@ -31,8 +31,12 @@ CommandBatch generateBatch(char *command) {
 }
 
 void printCommandBatch(CommandBatch batch) {
-    int i = 0;
-    for (; i < batch.size; ++i) {
-        printf("%s\n", batch.commands[i]);
+    printBatchInterval(batch, 0, batch.size - 1);
+}
+
+void printBatchInterval(CommandBatch batch, int begin, int end) {
+    while (begin <= end) {
+        printf("%s ", batch.commands[begin++]);
     }
+    printf("\n");
 }

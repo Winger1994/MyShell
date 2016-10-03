@@ -17,5 +17,6 @@ typedef struct CommandBatch {
 
 CommandBatch generateBatch(char *command);
 void printCommandBatch(CommandBatch batch);
+void printBatchInterval(CommandBatch batch, int begin, int end);
 
 #endif /* CommandBatch_h */

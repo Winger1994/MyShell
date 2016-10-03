@@ -17,6 +17,8 @@ int getString(char *buffer, int size) {
     int i = 0;
     for (; i < size; ++i) {
         char tmp = getchar();
+        if (tmp == EOF)
+            exit(0);
         if (tmp == '\n') {
             buffer[i] = 0;
             return i;
@@ -101,6 +103,8 @@ void errorPrompt() {
         case ENOENT:
             fprintf(stderr, "No Such File or Directory!\n");
             break;
+        case EFAULT:
+            fprintf(stderr, "Bad Address!\n");
         default:
             fprintf(stderr, "Something Wrong! Error Number: %d\n", errno);
             break;

@@ -40,19 +40,24 @@ int fileRedirectCall(CommandBatch batch, int begin, int end) {
         if (isStringEqual(token, "<")) {
             int fd_in = open(nextToken, O_RDONLY);
             dup2(fd_in, 0);
+            close(fd_in);
         } else if (isStringEqual(token, ">") || isStringEqual(token, "1>")) {
             int fd_out = open(nextToken, O_CREAT | O_RDWR | O_TRUNC, fileOpenOptions);
             dup2(fd_out, 1);
+            close(fd_out);
         } else if (isStringEqual(token, ">>")) {
             int fd_out = open(nextToken, O_CREAT | O_RDWR | O_APPEND, fileOpenOptions);
             dup2(fd_out, 1);
+            close(fd_out);
         } else if (isStringEqual(token, "2>")) {
             int fd_out = open(nextToken, O_CREAT | O_RDWR | O_TRUNC, fileOpenOptions);
             dup2(fd_out, 2);
+            close(fd_out);
         } else if (isStringEqual(token, "&>")) {
             int fd_out = open(nextToken, O_CREAT | O_RDWR | O_TRUNC, fileOpenOptions);
             dup2(fd_out, 1);
             dup2(fd_out, 2);
+            close(fd_out);
         } else {
             stringGoupAppend(&parameters, &capacity, &size, token);
             --i;
@@ -67,6 +72,52 @@ int fileRedirectCall(CommandBatch batch, int begin, int end) {
     return ret;
 }
 
+int pipeCall(CommandBatch batch, int begin, int end) {
+    if (begin > end) {
+        fprintf(stderr, "Parse Error!\n");
+        return -1;
+    }
+    int pipePos = begin;
+    while (pipePos <= end) {
+        if (isStringEqual(batch.commands[pipePos], "|")) {
+            break;
+        }
+        ++pipePos;
+    }
+    if (pipePos > end) {
+        return fileRedirectCall(batch, begin, end);
+    }
+    if (mainDebug) {
+        printf("before pipe: ");
+        printBatchInterval(batch, begin, pipePos - 1);
+        printf("after pipe: ");
+        printBatchInterval(batch, pipePos + 1, end);
+    }
+    int pipeArr[2];
+    if (pipe(pipeArr)) {
+        fprintf (stderr, "Pipe failed.\n");
+        return -1;
+    }
+    printf("pipeArr[0]: %d  pipeArr[1]: %d\n", pipeArr[0], pipeArr[1]);
+    int pid = fork();
+    int status;
+    switch (pid) {
+        case -1:
+            fprintf(stderr, "FORK ERROR!\n");
+            return 1;
+        case 0: // child process write
+            close(pipeArr[0]);
+            dup2(pipeArr[1], 1);
+            close(pipeArr[1]);
+            return fileRedirectCall(batch, begin, pipePos - 1);
+        default: // parent process read
+            close(pipeArr[1]);
+            dup2(pipeArr[0], 0);
+            close(pipeArr[0]);
+            return pipeCall(batch, pipePos + 1, end);
+    }
+}
+
 void changeDir(const char *path) {
     int ret = chdir(path);
     if (ret != 0)
@@ -79,7 +130,7 @@ int main(int argc, const char * argv[]) {
     char *inputBuffer = (char*) malloc(sizeof(char) * BUFFERSIZE);
     printf("%s", prompt);
     getString(inputBuffer, BUFFERSIZE);
-    int pid, block;
+    int pid, status;
     while (!isStringEqual("exit", inputBuffer)) {
         // inputBuffer = addEssentialSpaces(inputBuffer);
         debugPrintf(mainDebug, "buffer: %s\n", inputBuffer);
@@ -93,13 +144,13 @@ int main(int argc, const char * argv[]) {
         pid = fork();
         switch (pid) {
             case -1:
-                printf("FORK ERROR!\n");
+                fprintf(stderr, "FORK ERROR!\n");
                 return 1;
             case 0: // child process
-                // return simpleCall(batch, 0, batch.size - 1);
-                return fileRedirectCall(batch, 0, batch.size - 1);
+                // return fileRedirectCall(batch, 0, batch.size - 1);
+                return pipeCall(batch, 0, batch.size - 1);
             default: // parent process
-                while (wait(&block) < 0);
+                while (wait(&status) < 0);
                 debugPrintf(mainDebug, "child pid: %d terminated\n", pid);
                 break;
         }
