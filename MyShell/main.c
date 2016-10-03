@@ -22,6 +22,7 @@ int simpleCall(CommandBatch batch) {
     parameters[batch.size] = NULL;
     ret = execvp(batch.commands[0], parameters);
     debugPrintf(mainDebug, "[child] ret: %d\n", ret);
+    fprintf(stderr, "Command not Found!\n");
     return ret;
 }
 
