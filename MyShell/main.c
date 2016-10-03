@@ -32,6 +32,8 @@ int main(int argc, const char * argv[]) {
     int pid, block;
     while (!isStringEqual("exit", inputBuffer)) {
         CommandBatch batch = generateBatch(inputBuffer);
+        if (batch.size == 0)
+            goto next;
         pid = fork();
         switch (pid) {
             case -1:
@@ -44,6 +46,8 @@ int main(int argc, const char * argv[]) {
                 debugPrintf(mainDebug, "child pid: %d terminated\n", pid);
                 break;
         }
+        free(batch.commands);
+    next:
         printf("%s", prompt);
         getString(inputBuffer, BUFFERSIZE);
     }

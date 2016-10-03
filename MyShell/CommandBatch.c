@@ -8,7 +8,7 @@
 
 #include "CommandBatch.h"
 
-int batchDebug = 0;
+const int batchDebug = 0;
 
 char **doubleCapacity(char **batch, int *capacity) {
     int newCap = *capacity * 2;
@@ -25,17 +25,21 @@ CommandBatch generateBatch(char *command) {
     int capacity = 10;
     int size = 0;
     char **batch = (char **)malloc(sizeof(char*) * capacity);
-    char *token = strtok(command, delims);
+    int pos = 0;
+    char *token = nextToken(command, delims, &pos);
+    if (token != NULL) debugPrintf(batchDebug, "next token is %s\n", token);
     while (token != NULL) {
         if (size == capacity) {
             batch = doubleCapacity(batch, &capacity);
         }
         batch[size++] = token;
-        token = strtok(NULL, delims);
+        token = nextToken(command, delims, &pos);
+        if (token != NULL) debugPrintf(batchDebug, "next token is %s\n", token);
     }
     CommandBatch res;
     res.size = size;
     res.commands = batch;
+    if (batchDebug) printCommandBatch(res);
     return res;
 }
 

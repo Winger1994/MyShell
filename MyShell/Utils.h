@@ -15,6 +15,7 @@ typedef int bool;
 
 int getString(char *buffer, int size);
 bool isStringEqual(char *a, char *b);
+char *nextToken(char *command, const char *delims, int *pos);
 void debugPrintf(int level, const char *fmt, ...);
 
 #endif /* Utils_h */

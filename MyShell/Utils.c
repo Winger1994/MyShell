@@ -8,6 +8,8 @@
 
 #include "Utils.h"
 
+const int utilsDebug = 0;
+
 const bool true = 1;
 const bool false = 0;
 
@@ -31,6 +33,30 @@ bool isStringEqual(char *a, char *b) {
         ++a; ++b;
     }
     return false;
+}
+
+bool isBelong(char c, const char *group) {
+    int i = 0;
+    while (group[i] != 0) {
+        if (c == group[i++]) {
+            debugPrintf(utilsDebug, "%c belongs to %s\n", c, group);
+            return true;
+        }
+    }
+    return false;
+}
+
+char *nextToken(char *command, const char *delims, int *pos) {
+    while (command[*pos] != 0 && isBelong(command[*pos], delims))
+        ++(*pos);
+    if (command[*pos] == 0)
+        return NULL;
+    int begin = *pos;
+    while (command[*pos] != 0 && !isBelong(command[*pos], delims))
+        ++(*pos);
+    if (command[*pos] != 0)
+        command[(*pos)++] = 0;
+    return &command[begin];
 }
 
 void debugPrintf(int level, const char *fmt, ...) {
