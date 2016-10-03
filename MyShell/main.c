@@ -65,7 +65,7 @@ int fileRedirectCall(CommandBatch batch, int begin, int end) {
         i += 2;
     }
     stringGoupAppend(&parameters, &capacity, &size, NULL);
-    int ret = execvp(batch.commands[0], parameters);
+    int ret = execvp(batch.commands[begin], parameters);
     debugPrintf(mainDebug, "[child] ret: %d\n", ret);
     if (ret != 0)
         errorPrompt();
@@ -98,9 +98,7 @@ int pipeCall(CommandBatch batch, int begin, int end) {
         fprintf (stderr, "Pipe failed.\n");
         return -1;
     }
-    printf("pipeArr[0]: %d  pipeArr[1]: %d\n", pipeArr[0], pipeArr[1]);
     int pid = fork();
-    int status;
     switch (pid) {
         case -1:
             fprintf(stderr, "FORK ERROR!\n");
