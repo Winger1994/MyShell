@@ -10,18 +10,8 @@
 
 const int batchDebug = 0;
 
-char **doubleCapacity(char **batch, int *capacity) {
-    int newCap = *capacity * 2;
-    char **newBatch = (char **)malloc(sizeof(char*) * newCap);
-    memcpy(newBatch, batch, sizeof(char*) * (*capacity));
-    free(batch);
-    debugPrintf(batchDebug, "double batch capacity from %d to %d\n", *capacity, newCap);
-    *capacity = newCap;
-    return newBatch;
-}
-
 CommandBatch generateBatch(char *command) {
-    char delims[] = {' ', '\t', '\n'};
+    char delims[] = {' ', '\t'};
     int capacity = 10;
     int size = 0;
     char **batch = (char **)malloc(sizeof(char*) * capacity);
@@ -29,10 +19,7 @@ CommandBatch generateBatch(char *command) {
     char *token = nextToken(command, delims, &pos);
     if (token != NULL) debugPrintf(batchDebug, "next token is %s\n", token);
     while (token != NULL) {
-        if (size == capacity) {
-            batch = doubleCapacity(batch, &capacity);
-        }
-        batch[size++] = token;
+        stringGoupAppend(&batch, &capacity, &size, token);
         token = nextToken(command, delims, &pos);
         if (token != NULL) debugPrintf(batchDebug, "next token is %s\n", token);
     }

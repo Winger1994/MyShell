@@ -59,6 +59,23 @@ char *nextToken(char *command, const char *delims, int *pos) {
     return &command[begin];
 }
 
+char **doubleCapacity(char **batch, int *capacity) {
+    int newCap = *capacity * 2;
+    char **newBatch = (char **)malloc(sizeof(char*) * newCap);
+    memcpy(newBatch, batch, sizeof(char*) * (*capacity));
+    free(batch);
+    debugPrintf(utilsDebug, "double batch capacity from %d to %d\n", *capacity, newCap);
+    *capacity = newCap;
+    return newBatch;
+}
+
+void stringGoupAppend(char ***group, int *capacity, int *size, char *content) {
+    if (*size == *capacity) {
+        *group = doubleCapacity(*group, capacity);
+    }
+    (*group)[(*size)++] = content;
+}
+
 void debugPrintf(int level, const char *fmt, ...) {
     if (level) {
         printf("[debug] ");
@@ -66,5 +83,26 @@ void debugPrintf(int level, const char *fmt, ...) {
         va_start(argptr, fmt);
         vprintf(fmt, argptr); // not call to printf!
         va_end(argptr);
+    }
+}
+
+void errorPrompt() {
+    fprintf(stderr, "Error: ");
+    switch (errno) {
+        case 0:
+            fprintf(stderr, "Wrong Call to Error Prompt!\n");
+            break;
+        case EACCES:
+            fprintf(stderr, "Permission Denied!\n");
+            break;
+        case ELOOP:
+            fprintf(stderr, "Symbloc Loops!\n");
+            break;
+        case ENOENT:
+            fprintf(stderr, "No Such File or Directory!\n");
+            break;
+        default:
+            fprintf(stderr, "Something Wrong! Error Number: %d\n", errno);
+            break;
     }
 }

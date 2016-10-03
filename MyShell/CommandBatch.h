@@ -8,9 +8,6 @@
 
 #ifndef CommandBatch_h
 #define CommandBatch_h
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
 #include "Utils.h"
 
 typedef struct CommandBatch {
