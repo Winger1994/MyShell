@@ -22,7 +22,7 @@ void doubelStringCapacity(char **string, int *capacity);
 void stringAppend(char **string, int *capacity, int *size, char content);
 
 char *nextToken(char *command, const char *delims, int *pos);
-char **doubleBatchCapacity(char **batch, int *capacity);
+void doubleBatchCapacity(char ***batch, int *capacity);
 void batchAppend(char ***batch, int *capacity, int *size, char *content);
 
 void debugPrintf(int level, const char *fmt, ...);

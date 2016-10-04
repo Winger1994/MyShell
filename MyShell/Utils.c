@@ -32,14 +32,13 @@ int getString(char *buffer, int *capacity) {
                     stringAppend(&buffer, capacity, &size, 0);
                     return size;
                 } else {
-                    stringAppend(&buffer, capacity, &size, '\n');
                     printf("> ");
                     break;
                 }
             default:
-                stringAppend(&buffer, capacity, &size, ch);
                 break;
         }
+        stringAppend(&buffer, capacity, &size, ch);
     }
 }
 
@@ -52,7 +51,7 @@ bool isStringEqual(char *a, char *b) {
     return false;
 }
 
-bool isBelong(char c, const char *group) {
+bool isCharBelong(char c, const char *group) {
     int i = 0;
     while (group[i] != 0) {
         if (c == group[i++]) {
@@ -67,7 +66,7 @@ bool isBelong(char c, const char *group) {
 void doubelStringCapacity(char **string, int *capacity) {
     int newCap = *capacity * 2;
     char *newStr = (char *)malloc(sizeof(char) * newCap);
-    memcpy(newStr, string, sizeof(char) * (*capacity));
+    memcpy(newStr, *string, sizeof(char) * (*capacity));
     free(*string);
     debugPrintf(utilsDebug, "double string capacity from %d to %d\n", *capacity, newCap);
     *capacity = newCap;
@@ -81,33 +80,50 @@ void stringAppend(char **string, int *capacity, int *size, char content) {
     (*string)[(*size)++] = content;
 }
 
+
+// TODO: Need use stack to correctly match quotes
 char *nextToken(char *command, const char *delims, int *pos) {
-    while (command[*pos] != 0 && isBelong(command[*pos], delims))
+    int capacity = 10, size = 0;
+    char *res = (char*)malloc(capacity);
+    while (command[*pos] != 0 && isCharBelong(command[*pos], delims))
         ++(*pos);
     if (command[*pos] == 0)
         return NULL;
-    int begin = *pos;
-    while (command[*pos] != 0 && !isBelong(command[*pos], delims))
+    bool inSingleQuote = false;
+    bool inDoubleQuote = false;
+    while (command[*pos] != 0) {
+        if (!inSingleQuote && !inDoubleQuote
+            && isCharBelong(command[*pos], delims))
+            break;
+        switch (command[*pos]) {
+            case '\'':
+                inSingleQuote = !inSingleQuote;
+                break;
+            case '\"':
+                inDoubleQuote = !inDoubleQuote;
+                break;
+            default:
+                stringAppend(&res, &capacity, &size, command[*pos]);
+                break;
+        }
         ++(*pos);
-    int resSize = sizeof(char) * ((*pos) - begin);
-    char *res = (char*)malloc(resSize);
-    memcpy(res, command + begin, resSize);
+    }
     return res;
 }
 
-char **doubleBatchCapacity(char **batch, int *capacity) {
+void doubleBatchCapacity(char ***batch, int *capacity) {
     int newCap = *capacity * 2;
     char **newBatch = (char **)malloc(sizeof(char*) * newCap);
-    memcpy(newBatch, batch, sizeof(char*) * (*capacity));
-    free(batch);
+    memcpy(newBatch, *batch, sizeof(char*) * (*capacity));
+    free(*batch);
     debugPrintf(utilsDebug, "double batch capacity from %d to %d\n", *capacity, newCap);
     *capacity = newCap;
-    return newBatch;
+    *batch = newBatch;
 }
 
 void batchAppend(char ***batch, int *capacity, int *size, char *content) {
     if (*size == *capacity) {
-        *batch = doubleBatchCapacity(*batch, capacity);
+        doubleBatchCapacity(batch, capacity);
     }
     (*batch)[(*size)++] = content;
 }
@@ -135,7 +151,7 @@ void errorPrompt() {
             fprintf(stderr, "Symbloc Loops!\n");
             break;
         case ENOENT:
-            fprintf(stderr, "No Such File or Directory!\n");
+            fprintf(stderr, "File not Found!\n");
             break;
         case EFAULT:
             fprintf(stderr, "Bad Address!\n");
