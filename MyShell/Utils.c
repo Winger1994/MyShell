@@ -102,6 +102,10 @@ int isKeyWordsMatch(char *string) {
 void doubelStringCapacity(char **string, int *capacity) {
     int newCap = *capacity * 2;
     char *newStr = (char *)malloc(sizeof(char) * newCap);
+    if (newStr == NULL) {
+        fprintf(stderr, "[Function Error] malloc Failed to allocate %d bytes", newCap);
+        errorPrompt();
+    }
     memcpy(newStr, *string, sizeof(char) * (*capacity));
     free(*string);
     debugPrintf(utilsDebug, "double string capacity from %d to %d\n", *capacity, newCap);
@@ -118,6 +122,7 @@ void stringAppend(char **string, int *capacity, int *size, char content) {
 
 
 // TODO: Need use stack to correctly match quotes
+// TODO: Need to parse key words (pipe and file redirect)
 char *nextToken(char *command, const char *delims, int *pos) {
     int capacity = 10, size = 0;
     char *res = (char*)malloc(capacity);

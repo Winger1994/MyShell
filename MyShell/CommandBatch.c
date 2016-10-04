@@ -14,8 +14,12 @@ void lastFilenameInputPatch(char **batch, int *capacity, int *size) {
     debugPrintf(batchDebug, "last file name input capacity: %d size: %d\n", *capacity, *size);
     if (*size > 0 && isKeyWordsMatch(batch[*size - 1])) {
         printf("> ");
-        int bufferCap = 20;
+        int bufferCap = 1024;
         char *buffer = (char*) malloc(sizeof(char) * bufferCap);
+        if (buffer == NULL) {
+            fprintf(stderr, "[Function Error] malloc Failed to allocate %d bytes", bufferCap);
+            errorPrompt();
+        }
         getString(buffer, &bufferCap, 0);
         int pos = 0;
         char *filename = nextToken(buffer, " \t\n", &pos);
