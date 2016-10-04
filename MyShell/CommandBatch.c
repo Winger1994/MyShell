@@ -19,7 +19,7 @@ CommandBatch generateBatch(char *command) {
     char *token = nextToken(command, delims, &pos);
     if (token != NULL) debugPrintf(batchDebug, "next token is %s\n", token);
     while (token != NULL) {
-        stringGoupAppend(&batch, &capacity, &size, token);
+        batchAppend(&batch, &capacity, &size, token);
         token = nextToken(command, delims, &pos);
         if (token != NULL) debugPrintf(batchDebug, "next token is %s\n", token);
     }

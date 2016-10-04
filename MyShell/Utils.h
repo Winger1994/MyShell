@@ -19,8 +19,8 @@ typedef int bool;
 int getString(char *buffer, int size);
 bool isStringEqual(char *a, char *b);
 char *nextToken(char *command, const char *delims, int *pos);
-char **doubleCapacity(char **batch, int *capacity);
-void stringGoupAppend(char ***group, int *capacity, int *size, char *content);
+char **doubleBatchCapacity(char **batch, int *capacity);
+void batchAppend(char ***batch, int *capacity, int *size, char *content);
 void debugPrintf(int level, const char *fmt, ...);
 void errorPrompt();
 

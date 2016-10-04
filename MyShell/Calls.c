@@ -54,12 +54,12 @@ int fileRedirectCall(CommandBatch batch, int begin, int end) {
             dup2(fd_out, 2);
             close(fd_out);
         } else {
-            stringGoupAppend(&parameters, &capacity, &size, token);
+            batchAppend(&parameters, &capacity, &size, token);
             --i;
         }
         i += 2;
     }
-    stringGoupAppend(&parameters, &capacity, &size, NULL);
+    batchAppend(&parameters, &capacity, &size, NULL);
     int ret = execvp(batch.commands[begin], parameters);
     debugPrintf(callsDebug, "[child] ret: %d\n", ret);
     if (ret != 0)

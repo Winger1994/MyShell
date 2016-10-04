@@ -77,7 +77,7 @@ char *nextToken(char *command, const char *delims, int *pos) {
     return &command[begin];
 }
 
-char **doubleCapacity(char **batch, int *capacity) {
+char **doubleBatchCapacity(char **batch, int *capacity) {
     int newCap = *capacity * 2;
     char **newBatch = (char **)malloc(sizeof(char*) * newCap);
     memcpy(newBatch, batch, sizeof(char*) * (*capacity));
@@ -87,11 +87,11 @@ char **doubleCapacity(char **batch, int *capacity) {
     return newBatch;
 }
 
-void stringGoupAppend(char ***group, int *capacity, int *size, char *content) {
+void batchAppend(char ***batch, int *capacity, int *size, char *content) {
     if (*size == *capacity) {
-        *group = doubleCapacity(*group, capacity);
+        *batch = doubleBatchCapacity(*batch, capacity);
     }
-    (*group)[(*size)++] = content;
+    (*batch)[(*size)++] = content;
 }
 
 void debugPrintf(int level, const char *fmt, ...) {
