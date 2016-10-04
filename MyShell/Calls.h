@@ -18,5 +18,4 @@ int simpleCall(CommandBatch batch, int begin, int end);
 int fileRedirectCall(CommandBatch batch, int begin, int end);
 int pipeCall(CommandBatch batch, int begin, int end);
 
-
 #endif /* Calls_h */

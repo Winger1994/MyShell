@@ -6,14 +6,14 @@
 //  Copyright © 2016 赵超. All rights reserved.
 //
 
-
-
 #include "Calls.h"
+#include "signal.h"
 
 const int BUFFERSIZE = 1024;
 const char *prompt = "ve482sh $ ";
-const int mainDebug = 0;
+const int mainDebug = 1;
 
+int pid;
 
 void changeDir(const char *path) {
     int ret = chdir(path);
@@ -21,13 +21,31 @@ void changeDir(const char *path) {
         errorPrompt();
 }
 
+void signalHandler(int signo) {
+    debugPrintf(mainDebug, "Signal #%d Caught!\n", signo);
+    if (pid > 0) {
+        switch (signo) {
+            case SIGINT:
+                debugPrintf(mainDebug, "Redirect INT Signal to child: %d", pid);
+                kill(pid, SIGINT);
+                break;
+            default:
+                debugPrintf(mainDebug, "Signal Not Redict\n");
+                break;
+        }
+    } else {
+        debugPrintf(mainDebug, "pid: %d not Valid!\n", pid);
+    }
+}
+
 char *addEssentialSpaces(char *inputBuffer);
 
 int main(int argc, const char * argv[]) {
+    signal(SIGINT, signalHandler);
     char *inputBuffer = (char*) malloc(sizeof(char) * BUFFERSIZE);
     printf("%s", prompt);
     getString(inputBuffer, BUFFERSIZE);
-    int pid, status;
+    int status;
     while (!isStringEqual("exit", inputBuffer)) {
         // inputBuffer = addEssentialSpaces(inputBuffer);
         debugPrintf(mainDebug, "buffer: %s\n", inputBuffer);
@@ -45,6 +63,7 @@ int main(int argc, const char * argv[]) {
                 return 1;
             case 0: // child process
                 // return fileRedirectCall(batch, 0, batch.size - 1);
+                signal(SIGINT, SIG_DFL);
                 return pipeCall(batch, 0, batch.size - 1);
             default: // parent process
                 while (wait(&status) < 0);
