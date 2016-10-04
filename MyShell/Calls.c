@@ -16,7 +16,7 @@ int simpleCall(CommandBatch batch, int begin, int end) {
     char *parameters[end - begin + 2];
     memcpy(parameters, &batch.commands[begin], sizeof(char*) * (end - begin + 1));
     parameters[batch.size] = NULL;
-    ret = execvp(batch.commands[0], parameters);
+    ret = execvp(batch.commands[begin], parameters);
     debugPrintf(callsDebug, "[child] ret: %d\n", ret);
     if (ret != 0)
         errorPrompt();
@@ -100,11 +100,13 @@ int pipeCall(CommandBatch batch, int begin, int end) {
             return 1;
         case 0: // child process write
             close(pipeArr[0]);
+            close(1);
             dup2(pipeArr[1], 1);
             close(pipeArr[1]);
             return fileRedirectCall(batch, begin, pipePos - 1);
         default: // parent process read
             close(pipeArr[1]);
+            close(0);
             dup2(pipeArr[0], 0);
             close(pipeArr[0]);
             return pipeCall(batch, pipePos + 1, end);
