@@ -9,7 +9,7 @@
 #include "Calls.h"
 #include "signal.h"
 
-const int BUFFERSIZE = 1024;
+const int INITBUFFERSIZE = 1024;
 const char *prompt = "ve482sh $ ";
 const int mainDebug = 0;
 
@@ -42,13 +42,12 @@ void signalHandler(int signo) {
 char *addEssentialSpaces(char *inputBuffer);
 
 int main(int argc, const char * argv[]) {
+    int capacity = INITBUFFERSIZE, status;
     signal(SIGINT, signalHandler);
-    char *inputBuffer = (char*) malloc(sizeof(char) * BUFFERSIZE);
+    char *inputBuffer = (char*) malloc(sizeof(char) * capacity);
     printf("%s", prompt);
-    getString(inputBuffer, BUFFERSIZE);
-    int status;
+    getString(inputBuffer, &capacity);
     while (!isStringEqual("exit", inputBuffer)) {
-        // inputBuffer = addEssentialSpaces(inputBuffer);
         debugPrintf(mainDebug, "buffer: %s\n", inputBuffer);
         CommandBatch batch = generateBatch(inputBuffer);
         if (batch.size == 0)
@@ -71,53 +70,11 @@ int main(int argc, const char * argv[]) {
                 debugPrintf(mainDebug, "child pid: %d terminated\n", pid);
                 break;
         }
-        free(batch.commands);
+        freeBatch(batch);
     next:
         printf("%s", prompt);
-        getString(inputBuffer, BUFFERSIZE);
+        getString(inputBuffer, &capacity);
     }
     return 0;
-}
-
-char *addEssentialSpaces(char *inputBuffer) {
-    char *buffer = malloc(sizeof(char) * BUFFERSIZE);
-    char *oldBuffer = inputBuffer;
-    char *newBuffer = buffer;
-    int count;
-    while (*inputBuffer != 0) {
-        switch (*inputBuffer) {
-            case '|':
-                *(buffer++) = ' ';
-                *(buffer++) = '|';
-                *(buffer++) = ' ';
-                break;
-            case '<':
-                *(buffer++) = ' ';
-                *(buffer++) = '<';
-                *(buffer++) = ' ';
-                break;
-            case '>':
-                count = 0;
-                do {
-                    if (count % 2 == 0) {
-                        *(buffer++) = ' ';
-                    }
-                    *(buffer++) = '>';
-                    ++inputBuffer;
-                    ++count;
-                } while (*inputBuffer != 0 && *inputBuffer == '>');
-                *(buffer++) = ' ';
-                *(buffer++) = *inputBuffer;
-                if (*inputBuffer == 0)
-                    return newBuffer;
-                break;
-            default:
-                *(buffer++) = *inputBuffer;
-        }
-        ++inputBuffer;
-    }
-    free(oldBuffer);
-    *buffer = 0;
-    return newBuffer;
 }
 

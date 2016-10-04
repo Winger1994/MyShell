@@ -11,7 +11,7 @@
 const int batchDebug = 0;
 
 CommandBatch generateBatch(char *command) {
-    char delims[] = {' ', '\t'};
+    char *delims = " \t\n";
     int capacity = 10;
     int size = 0;
     char **batch = (char **)malloc(sizeof(char*) * capacity);
@@ -28,6 +28,14 @@ CommandBatch generateBatch(char *command) {
     res.commands = batch;
     if (batchDebug) printCommandBatch(res);
     return res;
+}
+
+void freeBatch(CommandBatch batch) {
+    int i = 0;
+    for (; i < batch.size; ++i) {
+        free(batch.commands[i]);
+    }
+    free(batch.commands);
 }
 
 void printCommandBatch(CommandBatch batch) {
