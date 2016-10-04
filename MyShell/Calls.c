@@ -17,7 +17,7 @@ int simpleCall(CommandBatch batch, int begin, int end) {
     memcpy(parameters, &batch.commands[begin], sizeof(char*) * (end - begin + 1));
     parameters[batch.size] = NULL;
     ret = execvp(batch.commands[begin], parameters);
-    debugPrintf(callsDebug, "[child] ret: %d\n", ret);
+    debugPrintf(callsDebug, "child ret: %d\n", ret);
     if (ret != 0)
         errorPrompt();
     return ret;
@@ -31,7 +31,16 @@ int fileRedirectCall(CommandBatch batch, int begin, int end) {
     int i = begin;
     while (i <= end) {
         char *token = batch.commands[i];
+        if (!isKeyWordsMatch(token)) {
+            batchAppend(&parameters, &capacity, &size, token);
+            ++i;
+            continue;
+        }
         char *nextToken = i < end ? batch.commands[i + 1] : NULL;
+        if (nextToken == NULL || isKeyWordsMatch(nextToken)) {
+            fprintf(stderr, "[Parse Error] File Redirect FILENAME NOT GIVEN!\n");
+            return -1;
+        }
         if (isStringEqual(token, "<")) {
             int fd_in = open(nextToken, O_RDONLY);
             dup2(fd_in, 0);
@@ -54,14 +63,14 @@ int fileRedirectCall(CommandBatch batch, int begin, int end) {
             dup2(fd_out, 2);
             close(fd_out);
         } else {
-            batchAppend(&parameters, &capacity, &size, token);
-            --i;
+            fprintf(stderr, "[Funtion Error] isKeyWordsMatch Wrong!\n");
+            return -1;
         }
         i += 2;
     }
     batchAppend(&parameters, &capacity, &size, NULL);
     int ret = execvp(batch.commands[begin], parameters);
-    debugPrintf(callsDebug, "[child] ret: %d\n", ret);
+    debugPrintf(callsDebug, "child ret: %d\n", ret);
     if (ret != 0)
         errorPrompt();
     return ret;
@@ -69,7 +78,7 @@ int fileRedirectCall(CommandBatch batch, int begin, int end) {
 
 int pipeCall(CommandBatch batch, int begin, int end) {
     if (begin > end) {
-        fprintf(stderr, "Parse Error!\n");
+        fprintf(stderr, "[Parse Error] During Pipe Parse!\n");
         return -1;
     }
     int pipePos = begin;
@@ -90,13 +99,13 @@ int pipeCall(CommandBatch batch, int begin, int end) {
     }
     int pipeArr[2];
     if (pipe(pipeArr)) {
-        fprintf (stderr, "Pipe failed.\n");
+        fprintf (stderr, "[Pipe Error] Pipe failed.\n");
         return -1;
     }
     int pid = fork();
     switch (pid) {
         case -1:
-            fprintf(stderr, "FORK ERROR!\n");
+            fprintf(stderr, "[Fork Error] Pipe Fork Failed!\n");
             return 1;
         case 0: // child process write
             close(pipeArr[0]);

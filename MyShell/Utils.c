@@ -13,8 +13,20 @@ const int utilsDebug = 0;
 const bool true = 1;
 const bool false = 0;
 
-int getString(char *buffer, int *capacity) {
+bool isCharBelong(char c, const char *group) {
+    int i = 0;
+    while (group[i] != 0) {
+        if (c == group[i++]) {
+            debugPrintf(utilsDebug, "%c belongs to %s\n", c, group);
+            return true;
+        }
+    }
+    return false;
+}
+
+int getString(char *buffer, int *capacity, int allowEmpty) {
     int size = 0;
+    int validSize = 0;
     int singleQuote = 0, doubleQuote = 0;
     while (true) {
         char ch = getchar();
@@ -29,20 +41,23 @@ int getString(char *buffer, int *capacity) {
                 break;
             case '\n':
                 if (singleQuote % 2 == 0 && doubleQuote % 2 == 0) {
-                    stringAppend(&buffer, capacity, &size, 0);
-                    return size;
-                } else {
-                    printf("> ");
-                    break;
+                    if (validSize != 0 || allowEmpty) {
+                        buffer[size] = 0;
+                        return size;
+                    }
                 }
+                printf("> ");
+                break;
             default:
                 break;
         }
         stringAppend(&buffer, capacity, &size, ch);
+        if (!isCharBelong(ch, " \t\n"))
+            ++validSize;
     }
 }
 
-bool isStringEqual(char *a, char *b) {
+bool isStringEqual(const char *a, const char *b) {
     while (*a == *b) {
         if (*a == 0)
             return true;
@@ -51,15 +66,36 @@ bool isStringEqual(char *a, char *b) {
     return false;
 }
 
-bool isCharBelong(char c, const char *group) {
+bool isStringMatch(const char *string, const char *pattern) {
+    while (*pattern != 0) {
+        if (*string != *pattern)
+            return false;
+        ++string; ++pattern;
+    }
+    return true;
+}
+
+bool isStringBelong(char *string, const char **group, int size) {
     int i = 0;
-    while (group[i] != 0) {
-        if (c == group[i++]) {
-            debugPrintf(utilsDebug, "%c belongs to %s\n", c, group);
+    for (; i < size; ++i) {
+        if (isStringEqual(string, group[i]))
             return true;
-        }
     }
     return false;
+}
+
+int isKeyWordsMatch(char *string) {
+    const int dosNum = 4;
+    const char *unoKeyWords = "|<>";
+    char *dosKeyWords[] = {">>", "1>", "2>", "&>"};
+    if (isCharBelong(*string, unoKeyWords))
+        return 1;
+    int i = 0;
+    for(; i < dosNum; ++i) {
+        if (isStringMatch(string, dosKeyWords[i]))
+            return 2;
+    }
+    return 0;
 }
 
 // TODO: This function is seriously flawed
@@ -92,9 +128,11 @@ char *nextToken(char *command, const char *delims, int *pos) {
     bool inSingleQuote = false;
     bool inDoubleQuote = false;
     while (command[*pos] != 0) {
-        if (!inSingleQuote && !inDoubleQuote
-            && isCharBelong(command[*pos], delims))
-            break;
+        if (!inSingleQuote && !inDoubleQuote) {
+            if (isCharBelong(command[*pos], delims))
+                break;
+            int keyLen = isKeyWordsMatch(command + *pos);
+        }
         switch (command[*pos]) {
             case '\'':
                 inSingleQuote = !inSingleQuote;
@@ -130,7 +168,7 @@ void batchAppend(char ***batch, int *capacity, int *size, char *content) {
 
 void debugPrintf(int level, const char *fmt, ...) {
     if (level) {
-        printf("[debug] ");
+        printf("[DEBUG] ");
         va_list argptr;
         va_start(argptr, fmt);
         vprintf(fmt, argptr); // not call to printf!
@@ -139,10 +177,11 @@ void debugPrintf(int level, const char *fmt, ...) {
 }
 
 void errorPrompt() {
-    fprintf(stderr, "Error: ");
+    if (errno)
+        fprintf(stderr, "[Error]: ");
     switch (errno) {
         case 0:
-            fprintf(stderr, "Wrong Call to Error Prompt!\n");
+            fprintf(stderr, "[Function Error] Wrong Call to Error Prompt!\n");
             break;
         case EACCES:
             fprintf(stderr, "Permission Denied!\n");

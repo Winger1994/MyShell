@@ -16,8 +16,12 @@
 
 typedef int bool;
 
-int getString(char *buffer, int *capacity);
-bool isStringEqual(char *a, char *b);
+int getString(char *buffer, int *capacity, int allowEmpty);
+bool isStringBelong(char *string, const char **group, int size);
+bool isStringEqual(const char *a, const char *b);
+
+int isKeyWordsMatch(char *string);
+
 void doubelStringCapacity(char **string, int *capacity);
 void stringAppend(char **string, int *capacity, int *size, char content);
 

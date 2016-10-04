@@ -46,7 +46,7 @@ int main(int argc, const char * argv[]) {
     signal(SIGINT, signalHandler);
     char *inputBuffer = (char*) malloc(sizeof(char) * capacity);
     printf("%s", prompt);
-    getString(inputBuffer, &capacity);
+    getString(inputBuffer, &capacity, 1);
     while (!isStringEqual("exit", inputBuffer)) {
         debugPrintf(mainDebug, "buffer: %s\n", inputBuffer);
         CommandBatch batch = generateBatch(inputBuffer);
@@ -59,7 +59,7 @@ int main(int argc, const char * argv[]) {
         pid = fork();
         switch (pid) {
             case -1:
-                fprintf(stderr, "FORK ERROR!\n");
+                fprintf(stderr, "[Fork Error] Command Execution Fork Failed!\n");
                 return 1;
             case 0: // child process
                 // return fileRedirectCall(batch, 0, batch.size - 1);
@@ -73,7 +73,7 @@ int main(int argc, const char * argv[]) {
         freeBatch(batch);
     next:
         printf("%s", prompt);
-        getString(inputBuffer, &capacity);
+        getString(inputBuffer, &capacity, 1);
     }
     return 0;
 }
