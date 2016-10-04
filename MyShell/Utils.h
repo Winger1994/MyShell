@@ -21,6 +21,7 @@ bool isStringBelong(char *string, const char **group, int size);
 bool isStringEqual(const char *a, const char *b);
 
 int isKeyWordsMatch(char *string);
+int isKeyWordsMatchGetPos(char *string, int *pos);
 
 void doubelStringCapacity(char **string, int *capacity);
 void stringAppend(char **string, int *capacity, int *size, char content);

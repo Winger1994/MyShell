@@ -31,40 +31,54 @@ int fileRedirectCall(CommandBatch batch, int begin, int end) {
     int i = begin;
     while (i <= end) {
         char *token = batch.commands[i];
-        if (!isKeyWordsMatch(token)) {
+        // the order is | , < , > , 1> , >> , 2> , &>
+        int pos;
+        if (!isKeyWordsMatchGetPos(token, &pos)) {
             batchAppend(&parameters, &capacity, &size, token);
             ++i;
             continue;
         }
+        debugPrintf(callsDebug, "get key word pos: %d\n", pos);
         char *nextToken = i < end ? batch.commands[i + 1] : NULL;
         if (nextToken == NULL || isKeyWordsMatch(nextToken)) {
             fprintf(stderr, "[Parse Error] File Redirect FILENAME NOT GIVEN!\n");
             return -1;
         }
-        if (isStringEqual(token, "<")) {
-            int fd_in = open(nextToken, O_RDONLY);
-            dup2(fd_in, 0);
-            close(fd_in);
-        } else if (isStringEqual(token, ">") || isStringEqual(token, "1>")) {
-            int fd_out = open(nextToken, O_CREAT | O_RDWR | O_TRUNC, fileOpenOptions);
-            dup2(fd_out, 1);
-            close(fd_out);
-        } else if (isStringEqual(token, ">>")) {
-            int fd_out = open(nextToken, O_CREAT | O_RDWR | O_APPEND, fileOpenOptions);
-            dup2(fd_out, 1);
-            close(fd_out);
-        } else if (isStringEqual(token, "2>")) {
-            int fd_out = open(nextToken, O_CREAT | O_RDWR | O_TRUNC, fileOpenOptions);
-            dup2(fd_out, 2);
-            close(fd_out);
-        } else if (isStringEqual(token, "&>")) {
-            int fd_out = open(nextToken, O_CREAT | O_RDWR | O_TRUNC, fileOpenOptions);
-            dup2(fd_out, 1);
-            dup2(fd_out, 2);
-            close(fd_out);
-        } else {
-            fprintf(stderr, "[Funtion Error] isKeyWordsMatch Wrong!\n");
-            return -1;
+        int fd_in, fd_out;
+        switch (pos) {
+            case 0:
+                fprintf(stderr, "[Function Error] isKeyWordsMatchGetPos error!\n");
+                break;
+            case 1:
+                fd_in = open(nextToken, O_RDONLY);
+                dup2(fd_in, 0);
+                close(fd_in);
+                break;
+            case 2:
+            case 3:
+                fd_out = open(nextToken, O_CREAT | O_RDWR | O_TRUNC, fileOpenOptions);
+                dup2(fd_out, 1);
+                close(fd_out);
+                break;
+            case 4:
+                fd_out = open(nextToken, O_CREAT | O_RDWR | O_APPEND, fileOpenOptions);
+                dup2(fd_out, 1);
+                close(fd_out);
+                break;
+            case 5:
+                fd_out = open(nextToken, O_CREAT | O_RDWR | O_TRUNC, fileOpenOptions);
+                dup2(fd_out, 2);
+                close(fd_out);
+                break;
+            case 6:
+                fd_out = open(nextToken, O_CREAT | O_RDWR | O_TRUNC, fileOpenOptions);
+                dup2(fd_out, 1);
+                dup2(fd_out, 2);
+                close(fd_out);
+                break;
+            default:
+                fprintf(stderr, "[Funtion Error] isKeyWordsMatch Wrong!\n");
+                return -1;
         }
         i += 2;
     }

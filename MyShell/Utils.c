@@ -18,10 +18,10 @@ bool isCharBelong(char c, const char *group) {
     while (group[i] != 0) {
         if (c == group[i++]) {
             debugPrintf(utilsDebug, "%c belongs to %s\n", c, group);
-            return true;
+            return i;
         }
     }
-    return false;
+    return 0;
 }
 
 int getString(char *buffer, int *capacity, int allowEmpty) {
@@ -85,19 +85,32 @@ bool isStringBelong(char *string, const char **group, int size) {
 }
 
 int isKeyWordsMatch(char *string) {
+    int dummy;
+    return isKeyWordsMatchGetPos(string, &dummy);
+}
+
+int isKeyWordsMatchGetPos(char *string, int *pos) {
     const int dosNum = 4;
     const char *unoKeyWords = "|<>";
-    char *dosKeyWords[] = {">>", "1>", "2>", "&>"};
+    char *dosKeyWords[] = {"1>", ">>", "2>", "&>"};
     /* priorier to match longer key words!
-     * example: >>> should >> >
+     * example: >>> should be parsed to >> >
      */
+    // the order is | , < , > , 1> , >> , 2> , &>
     int i = 0;
     for(; i < dosNum; ++i) {
-        if (isStringMatch(string, dosKeyWords[i]))
+        if (isStringMatch(string, dosKeyWords[i])) {
+            *pos = 3 + i;
             return 2;
+        }
     }
-    if (isCharBelong(*string, unoKeyWords))
+    int unoPos = isCharBelong(*string, unoKeyWords);
+    if (unoPos) {
+        // refer to the isCharBelong to check out why minus 1
+        *pos = unoPos - 1;
         return 1;
+    }
+    *pos = -1;
     return 0;
 }
 
