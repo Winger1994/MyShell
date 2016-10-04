@@ -88,13 +88,16 @@ int isKeyWordsMatch(char *string) {
     const int dosNum = 4;
     const char *unoKeyWords = "|<>";
     char *dosKeyWords[] = {">>", "1>", "2>", "&>"};
-    if (isCharBelong(*string, unoKeyWords))
-        return 1;
+    /* priorier to match longer key words!
+     * example: >>> should >> >
+     */
     int i = 0;
     for(; i < dosNum; ++i) {
         if (isStringMatch(string, dosKeyWords[i]))
             return 2;
     }
+    if (isCharBelong(*string, unoKeyWords))
+        return 1;
     return 0;
 }
 
@@ -130,13 +133,19 @@ char *nextToken(char *command, const char *delims, int *pos) {
         ++(*pos);
     if (command[*pos] == 0)
         return NULL;
+    int keyLen = isKeyWordsMatch(command + *pos);
+    if (keyLen > 0) {
+        memcpy(res, command + *pos, sizeof(char) * keyLen);
+        *pos += keyLen;
+        return res;
+    }
     bool inSingleQuote = false;
     bool inDoubleQuote = false;
     while (command[*pos] != 0) {
         if (!inSingleQuote && !inDoubleQuote) {
             if (isCharBelong(command[*pos], delims))
                 break;
-            int keyLen = isKeyWordsMatch(command + *pos);
+            keyLen = isKeyWordsMatch(command + *pos + 1);
         }
         switch (command[*pos]) {
             case '\'':
@@ -150,6 +159,8 @@ char *nextToken(char *command, const char *delims, int *pos) {
                 break;
         }
         ++(*pos);
+        if (keyLen)
+            break;
     }
     return res;
 }
