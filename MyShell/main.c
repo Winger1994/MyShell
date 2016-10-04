@@ -39,8 +39,6 @@ void signalHandler(int signo) {
     }
 }
 
-char *addEssentialSpaces(char *inputBuffer);
-
 int main(int argc, const char * argv[]) {
     int capacity = INITBUFFERSIZE, status;
     signal(SIGINT, signalHandler);

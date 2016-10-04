@@ -138,7 +138,6 @@ void stringAppend(char **string, int *capacity, int *size, char content) {
 
 
 // TODO: Need use stack to correctly match quotes
-// TODO: Need to parse key words (pipe and file redirect)
 char *nextToken(char *command, const char *delims, int *pos) {
     int capacity = 10, size = 0;
     char *res = (char*)malloc(capacity);
