@@ -11,7 +11,7 @@
 
 const int BUFFERSIZE = 1024;
 const char *prompt = "ve482sh $ ";
-const int mainDebug = 1;
+const int mainDebug = 0;
 
 int pid;
 
@@ -35,6 +35,7 @@ void signalHandler(int signo) {
         }
     } else {
         debugPrintf(mainDebug, "pid: %d not Valid!\n", pid);
+        printf("\n%s", prompt);
     }
 }
 

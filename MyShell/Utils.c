@@ -15,15 +15,31 @@ const bool false = 0;
 
 int getString(char *buffer, int size) {
     int i = 0;
+    int singleQuote = 0, doubleQuote = 0;
     for (; i < size; ++i) {
-        char tmp = getchar();
-        if (tmp == EOF)
-            exit(0);
-        if (tmp == '\n') {
-            buffer[i] = 0;
-            return i;
+        char ch = getchar();
+        switch (ch) {
+            case EOF:
+                exit(0);
+            case '\'':
+                ++singleQuote;
+                break;
+            case '\"':
+                ++doubleQuote;
+                break;
+            case '\n':
+                if (singleQuote % 2 == 0 && doubleQuote % 2 == 0) {
+                    buffer[i] = 0;
+                    return i;
+                } else {
+                    buffer[i] = '\n';
+                    printf("> ");
+                    break;
+                }
+            default:
+                buffer[i] = ch;
+                break;
         }
-        buffer[i] = tmp;
     }
     return size;
 }
