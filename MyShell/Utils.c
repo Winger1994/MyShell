@@ -136,16 +136,16 @@ char *nextToken(char *command, const char *delims, int *pos) {
     int keyLen = isKeyWordsMatch(command + *pos);
     if (keyLen > 0) {
         memcpy(res, command + *pos, sizeof(char) * keyLen);
+        res[keyLen] = 0;
         *pos += keyLen;
         return res;
     }
     bool inSingleQuote = false;
     bool inDoubleQuote = false;
     while (command[*pos] != 0) {
-        if (!inSingleQuote && !inDoubleQuote) {
-            if (isCharBelong(command[*pos], delims))
-                break;
-            keyLen = isKeyWordsMatch(command + *pos + 1);
+        if (!inSingleQuote && !inDoubleQuote
+            && isCharBelong(command[*pos], delims)) {
+            break;
         }
         switch (command[*pos]) {
             case '\'':
@@ -158,10 +158,13 @@ char *nextToken(char *command, const char *delims, int *pos) {
                 stringAppend(&res, &capacity, &size, command[*pos]);
                 break;
         }
+        if (!inSingleQuote && !inDoubleQuote)
+            keyLen = isKeyWordsMatch(command + *pos + 1);
         ++(*pos);
         if (keyLen)
             break;
     }
+    res[size] = 0;
     return res;
 }
 
