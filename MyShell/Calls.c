@@ -83,7 +83,7 @@ int fileRedirectCall(CommandBatch batch, int begin, int end) {
         i += 2;
     }
     batchAppend(&parameters, &capacity, &size, NULL);
-    int ret = execvp(batch.commands[begin], parameters);
+    int ret = execvp(parameters[0], parameters);
     debugPrintf(callsDebug, "child ret: %d\n", ret);
     if (ret != 0)
         errorPrompt();
